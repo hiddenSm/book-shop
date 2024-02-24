@@ -9,6 +9,17 @@ class Authors(models.Model):
     email = models.EmailField(null=True, blank=True)
     website = models.URLField(null=True, blank=True) # valid input: http\https://www.name.domain
     
+    @property
+    def full_name(self):
+        return f"{self.Fname} {self.Lname}"
+
+    # def save(self, *args, **kwargs):
+    #     self.__send_email()
+    #     return super().save(*args, **kwargs)
+    
+    # def __send_email(self): ...
+
+
     def __str__(self) -> str:
         return f'{self.Fname} {self.Lname}'
 
@@ -29,10 +40,11 @@ class Books(models.Model): # in view, set the permission class to IsAthenticated
     publisher = models.CharField(max_length=200)
     price = models.CharField(max_length=300)
     publishing_yaer = models.IntegerField()
+    discount = models.IntegerField(null=True)
+    price_after_discount = models.CharField(max_length=300, null=True)
     
     def __str__(self) -> str:
         return self.title
-
 
 class Buyers(models.Model): # in view, set the permission class to IsAthenticated
     buyer_fname = models.CharField(max_length=200)

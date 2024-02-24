@@ -11,6 +11,7 @@ router.register('buyers', views.BuyerViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),  
+    path('authors/<int:pk>/publisher-books/', views.publisher_books, name='publisher-books'),
 ]
 
 

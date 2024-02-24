@@ -1,4 +1,8 @@
-from rest_framework import generics, permissions, viewsets
+from rest_framework import generics, permissions, viewsets, status
+from rest_framework.decorators import action, api_view
+from rest_framework.response import Response
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Authors, Employees, Books,  Buyers
 from .serializers import AuthorsSerializer, EmployeesSerializer, BooksSerializer, BuyersSerializer
@@ -10,6 +14,29 @@ class AuthorViewSet(viewsets.ModelViewSet):
     serializer_class = AuthorsSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+
+    # @action(detail=True, methods=['get'])
+    # def published_books(self, request, pk=None):
+    #     author = self.get_object()
+    #     books = Books.objects.filter(author=author)
+    #     serializer = BooksSerializer(books, many=True)
+    #     return Response(serializer.data)
+
+    def list(self, request, *args, **kwargs):
+        # queryset = self.filter_queryset(self.get_queryset().order_by('-id'))
+        serializer = self.get_serializer(self.queryset, many=True)
+
+        return Response({'authors': serializer.data, 'total_authors': len(serializer.data)})
+
+@api_view(['GET'])
+def publisher_books(request, pk):
+    try:
+        books = Books.objects.filter(author=pk)
+        serializer = BooksSerializer(books, many=True)
+        return Response(serializer.data)
+    except Books.DoesNotExist:
+        return Response({'message': 'Author not found'}, status=status.HTTP_404_NOT_FOUND)
+
 class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employees.objects.all()
     serializer_class = EmployeesSerializer
@@ -19,6 +46,22 @@ class BookViewSet(viewsets.ModelViewSet):
     queryset = Books.objects.all()
     serializer_class = BooksSerializer
     permission_classes = [permissions.IsAuthenticated]
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        queryset = self.filter_queryset(queryset)
+        serializer = self.get_serializer(queryset, many=True)
+
+        for data in serializer.data:
+            if (data['discount'] is None) or (data['discount']==0):
+                del data['discount']
+                del data['price_after_discount']
+            elif data['discount'] > 0: # need to edited for this type: data['price']="1000$"
+                data['price_after_discount'] = (int(data['price']) - ((int(data['price'])*data['discount'])/100))
+                data['discount'] = f'{data['discount']}%'
+
+
+        return Response(serializer.data)
 
 class BuyerViewSet(viewsets.ModelViewSet):
     queryset = Buyers.objects.all()
