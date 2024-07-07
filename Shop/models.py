@@ -53,13 +53,3 @@ class Buyers(models.Model): # in view, set the permission class to IsAthenticate
 
     def __str__(self) -> str:
         return f'{self.buyer_fname} {self.buyer_lname}'
-    
-
-# We have to impelement a login page -- DONE
-# Only admins can see the data, so it means:
-# u go to the Authors url, u see a login page, if u r an admin, u enter ur user pass and then u can see the data
-# if u r not an admin and u r doesnt have an account, then u r not supposed to see anything. -- DONE
-
-# The other thing is about employees, does all the employees should have an account?
-# or only the ones that the boss is verified?
-# and even more, do we have an known boss account on the top? 
